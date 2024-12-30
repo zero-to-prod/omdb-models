@@ -8,14 +8,17 @@
 [![Packagist Version](https://img.shields.io/packagist/v/zero-to-prod/omdb?color=f28d1a)](https://packagist.org/packages/zero-to-prod/omdb)
 [![License](https://img.shields.io/packagist/l/zero-to-prod/omdb?color=red)](https://github.com/zero-to-prod/omdb-models/blob/main/LICENSE.md)
 
-Data Models and factories for the [OMDB API](https://www.omdbapi.com/).
-
-This works well when hydrating results from the [OmdbApi](https://github.com/zero-to-prod/omdb-api) package.
-
+- [Introduction](#introduction)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Factories](#factories)
+
+## Introduction
+
+Data Models and factories for the [OMDB API](https://www.omdbapi.com/).
+
+This works well when hydrating results from the [OmdbApi](https://github.com/zero-to-prod/omdb-api) package.
 
 ## Requirements
 

@@ -16,7 +16,11 @@ class SearchResults
      * Search Results
      * @var SearchItem[] $Search
      */
-    #[Describe(['cast' => [DataModelHelper::class, 'mapOf'], 'type' => SearchItem::class])]
+    #[Describe([
+        'cast' => [DataModelHelper::class, 'mapOf'],
+        'type' => SearchItem::class,
+        'key_by' => SearchItem::imdbID
+    ])]
     public array $Search;
 
     /** @see $totalResults */

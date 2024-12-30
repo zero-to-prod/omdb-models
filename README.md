@@ -10,6 +10,13 @@
 
 Data Models and factories for the [OMDB API](https://www.omdbapi.com/).
 
+This works well when hydrating results from the [OmdbApi](https://github.com/zero-to-prod/omdb-api) package.
+
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Factories](#factories)
+
 ## Requirements
 
 - PHP 8.1 or higher.
@@ -40,7 +47,7 @@ This package has the following models:
 \Zerotoprod\OmdbModels\Type::from();
 ```
 
-### Factories
+## Factories
 
 This package uses [Data Model Factories](https://github.com/zero-to-prod/data-model-factory) and has the following factories:
 

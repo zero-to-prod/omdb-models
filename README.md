@@ -8,6 +8,8 @@
 [![Packagist Version](https://img.shields.io/packagist/v/zero-to-prod/omdb?color=f28d1a)](https://packagist.org/packages/zero-to-prod/omdb)
 [![License](https://img.shields.io/packagist/l/zero-to-prod/omdb?color=red)](https://github.com/zero-to-prod/omdb-models/blob/main/LICENSE.md)
 
+## Contents
+
 - [Introduction](#introduction)
 - [Requirements](#requirements)
 - [Installation](#installation)

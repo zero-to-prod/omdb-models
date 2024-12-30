@@ -1,5 +1,7 @@
 # Zerotoprod\OmdbModels
 
+![](./logo.png)
+
 [![Repo](https://img.shields.io/badge/github-gray?logo=github)](https://github.com/zero-to-prod/omdb)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/zero-to-prod/omdb/test.yml?label=tests)](https://github.com/zero-to-prod/omdb/actions)
 [![Packagist Downloads](https://img.shields.io/packagist/dt/zero-to-prod/omdb?color=blue)](https://packagist.org/packages/zero-to-prod/omdb/stats)
@@ -41,6 +43,7 @@ This package has the following models:
 ### Factories
 
 This package uses [Data Model Factories](https://github.com/zero-to-prod/data-model-factory) and has the following factories:
+
 ```php
 \Zerotoprod\OmdbModels\Factories\ErrorFactory::factory()->setMessage('message')->make();
 \Zerotoprod\OmdbModels\Factories\RatingFactory::factory()->setValue('2')->make();

@@ -15,7 +15,7 @@ class SearchItemFactoryTest extends TestCase
 
         self::assertEquals('', $SearchItem->Title);
         self::assertEquals('', $SearchItem->Year);
-        self::assertEquals('', $SearchItem->imdbID);
+        self::assertNotEmpty($SearchItem->imdbID);
         self::assertEquals(Type::movie, $SearchItem->Type);
         self::assertEquals('', $SearchItem->Poster);
     }

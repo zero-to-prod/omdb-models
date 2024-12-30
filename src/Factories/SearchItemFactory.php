@@ -2,6 +2,7 @@
 
 namespace Zerotoprod\OmdbModels\Factories;
 
+use Random\RandomException;
 use Zerotoprod\DataModelFactory\Factory;
 use Zerotoprod\OmdbModels\SearchItem;
 use Zerotoprod\OmdbModels\Type;
@@ -17,7 +18,7 @@ class SearchItemFactory
         return [
             SearchItem::Title => '',
             SearchItem::Year => '',
-            SearchItem::imdbID => '',
+            SearchItem::imdbID => random_int(100, 999),
             SearchItem::Type => Type::movie,
             SearchItem::Poster => '',
         ];

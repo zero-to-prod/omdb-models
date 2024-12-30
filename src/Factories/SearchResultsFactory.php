@@ -9,9 +9,9 @@ class SearchResultsFactory
 {
     use Factory;
 
-    protected $model = SearchResults::class;
+    protected string $model = SearchResults::class;
 
-    protected function definition(): array
+    public function definition(): array
     {
         return [
             SearchResults::Search => [SearchItemFactory::factory()->make()],

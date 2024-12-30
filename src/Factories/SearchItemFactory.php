@@ -10,9 +10,9 @@ class SearchItemFactory
 {
     use Factory;
 
-    protected $model = SearchItem::class;
+    protected string $model = SearchItem::class;
 
-    protected function definition(): array
+    public function definition(): array
     {
         return [
             SearchItem::Title => '',

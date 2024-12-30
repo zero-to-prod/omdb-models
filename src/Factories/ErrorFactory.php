@@ -10,9 +10,9 @@ class ErrorFactory
 {
     use Factory;
 
-    protected $model = Error::class;
+    protected string $model = Error::class;
 
-    protected function definition(): array
+    public function definition(): array
     {
         return [
             Error::ErrorType => ErrorType::http,

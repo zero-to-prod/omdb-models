@@ -9,9 +9,9 @@ class RatingFactory
 {
     use Factory;
 
-    protected $model = Rating::class;
+    protected string $model = Rating::class;
 
-    protected function definition(): array
+    public function definition(): array
     {
         return [
             Rating::Source => '',

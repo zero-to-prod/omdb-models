@@ -10,9 +10,9 @@ class TitleFactory
 {
     use Factory;
 
-    protected $model = Title::class;
+    protected string $model = Title::class;
 
-    protected function definition(): array
+    public function definition(): array
     {
         return [
             Title::Title => '',

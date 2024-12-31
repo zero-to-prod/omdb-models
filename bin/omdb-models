@@ -7,37 +7,36 @@ if ($argc !== 3) {
 }
 
 $targetDir = rtrim($argv[1], '/');
-$baseNamespace = $argv[2];
+$baseNamespace = trim($argv[2], '\\');
 
-// Adjust as needed if your script is not in the same directory as src.
-// E.g.: If script resides in bin/omdb-models, then parent is ../
+// Point this to wherever your `src/` folder is located relative to this script:
 $srcDir = realpath(__DIR__ . '/../src');
-
 if (!$srcDir) {
     echo "Could not find 'src' directory." . PHP_EOL;
     exit(1);
 }
 
 /**
- * Recursively copy files from $src to $dst and update namespaces
+ * Recursively copy files from $src to $dst, update namespaces, and rewrite
+ * "use Zerotoprod\OmdbModels\..." to "use {baseNamespace}\...".
  *
  * @param string $src          The source path we’re copying from
  * @param string $dst          The destination path
- * @param string $baseNS       The root/base namespace (e.g., "Project\\Namespace")
+ * @param string $baseNS       The root/base namespace (e.g., "Framework\\DataModels")
  * @param string $relativeNS   The sub-namespace constructed from subfolders
  */
 function copy_files(string $src, string $dst, string $baseNS, string $relativeNS = ''): void
 {
-    // Build the full namespace for this directory level
-    // (Remove leading/trailing backslashes if they exist)
     $fullNamespace = trim($baseNS . '\\' . $relativeNS, '\\');
 
+    // Ensure the target directory exists
     if (!is_dir($dst)) {
         if (!mkdir($dst, 0777, true) && !is_dir($dst)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $dst));
         }
     }
 
+    // Open source directory
     $handle = opendir($src);
     if (!$handle) {
         throw new RuntimeException(sprintf('Directory "%s" could not be opened', $src));
@@ -52,30 +51,39 @@ function copy_files(string $src, string $dst, string $baseNS, string $relativeNS
         $dstFile = $dst . '/' . $file;
 
         if (is_dir($srcFile)) {
-            // Append the directory name to the sub-namespace
+            // Recurse into subdirectory, appending it to the namespace
             copy_files(
                 $srcFile,
                 $dstFile,
                 $baseNS,
-                // Convert directory name into a valid sub-namespace segment
                 trim($relativeNS . '\\' . $file, '\\')
             );
         } else {
-            // Copy the file
+            // Copy file
             copy($srcFile, $dstFile);
 
-            // Replace the namespace line
             $content = file_get_contents($dstFile);
-            // Ensure we only change the first "namespace ..." line.
-            // If these files do not contain a namespace line, we can optionally skip.
-            // For safety, we’ll replace any top-level namespace we find:
+            if ($content === false) {
+                throw new RuntimeException(sprintf('Could not read file "%s"', $dstFile));
+            }
+
+            // 1) Replace the file's namespace line
             $content = preg_replace(
                 '/^namespace\s+.*;/m',
                 'namespace ' . $fullNamespace . ';',
                 $content
             );
 
+            // 2) Rewrite "use Zerotoprod\OmdbModels\..." => "use {baseNamespace}\..."
+            //    Example: "use Zerotoprod\OmdbModels\SearchItem;" => "use Framework\DataModels\SearchItem;"
+            $content = preg_replace(
+                '/^use\s+Zerotoprod\\\\OmdbModels\\\\(.+);/m',
+                'use ' . trim($baseNS, '\\') . '\\\\$1;',
+                $content
+            );
+
             file_put_contents($dstFile, $content);
+
             echo "Copied file: $dstFile with namespace $fullNamespace" . PHP_EOL;
         }
     }

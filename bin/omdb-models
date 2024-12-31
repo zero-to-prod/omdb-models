@@ -43,7 +43,7 @@ if (!$srcDir) {
  */
 if ($baseNamespace === null) {
     // Usually, your composer.json might be one directory above, or in the same dir.
-    $composerFile = realpath(__DIR__ . '/../composer.json');
+    $composerFile = realpath(__DIR__ . '/../../composer.json');
     if (!is_file($composerFile)) {
         echo "composer.json not found. Please specify the namespace manually.\n";
         exit(1);

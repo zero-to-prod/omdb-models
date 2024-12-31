@@ -1,19 +1,83 @@
 #!/usr/bin/env php
 <?php
 
-if ($argc !== 3) {
-    echo "Usage: omdb-models app/DataModels Project\\\\Namespace" . PHP_EOL;
+/**
+ * Usage:
+ *   1) ./omdb-models path/to/targetDir [Base\\Namespace]
+ *
+ * If the Base\\Namespace is omitted, we look up your local composer.json,
+ * find the "autoload" -> "psr-4" array, and attempt to locate a namespace
+ * whose relative path matches targetDir.
+ *
+ * Example:
+ *   "autoload": {
+ *     "psr-4": {
+ *       "Framework\\DataModels\\": "app/DataModels"
+ *     }
+ *   }
+ *
+ * If we run:
+ *   ./omdb-models app/DataModels
+ * and find the above line, we deduce the namespace "Framework\\DataModels".
+ */
+
+if ($argc < 2 || $argc > 3) {
+    echo "Usage: omdb-models <targetDir> [Project\\\\Namespace]\n";
     exit(1);
 }
 
+// CLI arguments
 $targetDir = rtrim($argv[1], '/');
-$baseNamespace = trim($argv[2], '\\');
+$baseNamespace = $argc === 3 ? trim($argv[2], '\\') : null;
 
-// Point this to wherever your `src/` folder is located relative to this script:
+// Locate src directory (adjust to your own structure if needed)
 $srcDir = realpath(__DIR__ . '/../src');
 if (!$srcDir) {
-    echo "Could not find 'src' directory." . PHP_EOL;
+    echo "Could not find 'src' directory.\n";
     exit(1);
+}
+
+/**
+ * If no base namespace was provided, attempt to parse it from composer.json
+ * matching the targetDir with what's in the PSR-4 autoload block.
+ */
+if ($baseNamespace === null) {
+    // Usually, your composer.json might be one directory above, or in the same dir.
+    $composerFile = realpath(__DIR__ . '/../composer.json');
+    if (!is_file($composerFile)) {
+        echo "composer.json not found. Please specify the namespace manually.\n";
+        exit(1);
+    }
+
+    $composerData = json_decode(file_get_contents($composerFile), true);
+    if (!isset($composerData['autoload']['psr-4'])) {
+        echo "No PSR-4 autoload section found in composer.json. Specify the namespace manually.\n";
+        exit(1);
+    }
+
+    $psr4Map = $composerData['autoload']['psr-4'];
+    $matchedNamespace = null;
+
+    // Attempt to find a PSR-4 entry whose path matches $targetDir
+    foreach ($psr4Map as $ns => $path) {
+        // Remove trailing slash from the path
+        $path = rtrim($path, '/');
+
+        // Compare with $targetDir (also ignoring trailing slashes)
+        if ($path === $targetDir) {
+            $matchedNamespace = rtrim($ns, '\\');
+            break;
+        }
+    }
+
+    if (!$matchedNamespace) {
+        echo "Could not find a PSR-4 mapping in composer.json matching '{$targetDir}'.\n";
+        echo "Please specify the namespace manually.\n";
+        exit(1);
+    }
+
+    $baseNamespace = $matchedNamespace;
+    echo "No namespace provided; using '{$baseNamespace}' from composer.json.\n";
 }
 
 /**
@@ -22,21 +86,20 @@ if (!$srcDir) {
  *
  * @param string $src          The source path we’re copying from
  * @param string $dst          The destination path
- * @param string $baseNS       The root/base namespace (e.g., "Framework\\DataModels")
+ * @param string $baseNS       The root/base namespace (e.g. "Framework\\DataModels")
  * @param string $relativeNS   The sub-namespace constructed from subfolders
  */
 function copy_files(string $src, string $dst, string $baseNS, string $relativeNS = ''): void
 {
+    // Build the full namespace for this directory level
     $fullNamespace = trim($baseNS . '\\' . $relativeNS, '\\');
 
-    // Ensure the target directory exists
     if (!is_dir($dst)) {
         if (!mkdir($dst, 0777, true) && !is_dir($dst)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $dst));
         }
     }
 
-    // Open source directory
     $handle = opendir($src);
     if (!$handle) {
         throw new RuntimeException(sprintf('Directory "%s" could not be opened', $src));
@@ -51,7 +114,7 @@ function copy_files(string $src, string $dst, string $baseNS, string $relativeNS
         $dstFile = $dst . '/' . $file;
 
         if (is_dir($srcFile)) {
-            // Recurse into subdirectory, appending it to the namespace
+            // Append the directory name to the sub-namespace
             copy_files(
                 $srcFile,
                 $dstFile,
@@ -59,7 +122,7 @@ function copy_files(string $src, string $dst, string $baseNS, string $relativeNS
                 trim($relativeNS . '\\' . $file, '\\')
             );
         } else {
-            // Copy file
+            // Copy the file
             copy($srcFile, $dstFile);
 
             $content = file_get_contents($dstFile);
@@ -74,17 +137,15 @@ function copy_files(string $src, string $dst, string $baseNS, string $relativeNS
                 $content
             );
 
-            // 2) Rewrite "use Zerotoprod\OmdbModels\..." => "use {baseNamespace}\..."
-            //    Example: "use Zerotoprod\OmdbModels\SearchItem;" => "use Framework\DataModels\SearchItem;"
+            // 2) Rewrite "use Zerotoprod\OmdbModels\..." => "use {baseNS}\..."
             $content = preg_replace(
                 '/^use\s+Zerotoprod\\\\OmdbModels\\\\(.+);/m',
-                'use ' . trim($baseNS, '\\') . '\\\\$1;',
+                'use ' . $baseNS . '\\\\$1;',
                 $content
             );
 
             file_put_contents($dstFile, $content);
-
-            echo "Copied file: $dstFile with namespace $fullNamespace" . PHP_EOL;
+            echo "Copied file: $dstFile with namespace: $fullNamespace\n";
         }
     }
 
@@ -93,4 +154,4 @@ function copy_files(string $src, string $dst, string $baseNS, string $relativeNS
 
 copy_files($srcDir, $targetDir, $baseNamespace);
 
-echo "DONE" . PHP_EOL;
+echo "DONE\n";

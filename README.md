@@ -36,6 +36,12 @@ composer require zero-to-prod/omdb-models
 
 This will add the package to your project’s dependencies and create an autoloader entry for it.
 
+### Publishing Files
+You can directly import these files into your project like this:
+```shell
+./vendor/bin/omdb-models ./app/DataModels App\\DataModels
+```
+
 ## Usage
 
 This package has the following models:

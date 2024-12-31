@@ -32,7 +32,7 @@ $targetDir = rtrim($argv[1], '/');
  * 1) Locate the 'src' folder of THIS package
  *    Adjust if necessary for your package’s structure.
  */
-$srcDir = realpath(__DIR__ . '/../src');
+$srcDir = dirname(__DIR__).'/src';
 if (!$srcDir) {
     echo "Could not locate this package's src directory.\n";
     exit(1);

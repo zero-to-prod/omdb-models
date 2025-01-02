@@ -7,6 +7,7 @@
 [![Packagist Downloads](https://img.shields.io/packagist/dt/zero-to-prod/omdb?color=blue)](https://packagist.org/packages/zero-to-prod/omdb/stats)
 [![Packagist Version](https://img.shields.io/packagist/v/zero-to-prod/omdb?color=f28d1a)](https://packagist.org/packages/zero-to-prod/omdb)
 [![License](https://img.shields.io/packagist/l/zero-to-prod/omdb?color=red)](https://github.com/zero-to-prod/omdb-models/blob/main/LICENSE.md)
+[![wakatime](https://wakatime.com/badge/github/zero-to-prod/omdb-models.svg)](https://wakatime.com/badge/github/zero-to-prod/omdb-models)
 
 ## Contents
 
@@ -35,6 +36,12 @@ composer require zero-to-prod/omdb-models
 ```
 
 This will add the package to your project’s dependencies and create an autoloader entry for it.
+
+### Publishing Files
+You can directly import these files into your project like this:
+```shell
+./vendor/bin/omdb-models ./app/DataModels App\\DataModels
+```
 
 ## Usage
 

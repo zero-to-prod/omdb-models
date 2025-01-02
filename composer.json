@@ -39,6 +39,9 @@
   "require-dev": {
     "phpunit/phpunit": "^10.0"
   },
+  "bin": [
+    "bin/omdb-models"
+  ],
   "suggest": {
     "zero-to-prod/data-model": "Transform Data to Type-Safe DTOs",
     "zero-to-prod/data-model-helper": "Helpers for a DataModel."

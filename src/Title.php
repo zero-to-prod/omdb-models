@@ -102,7 +102,7 @@ class Title
      * @var Rating[] $Ratings
      * @see Rating
      */
-    #[Describe(['cast' => [DataModelHelper::class, 'mapOf'], 'type' => Rating::class, 'nullable'])]
+    #[Describe(['cast' => [self::class, 'mapOf'], 'type' => Rating::class, 'nullable'])]
     public readonly ?array $Ratings;
 
     /** @see $Metascore */

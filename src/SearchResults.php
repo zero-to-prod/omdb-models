@@ -17,7 +17,7 @@ class SearchResults
      * @var SearchItem[] $Search
      */
     #[Describe([
-        'cast' => [DataModelHelper::class, 'mapOf'],
+        'cast' => [self::class, 'mapOf'],
         'type' => SearchItem::class,
         'key_by' => SearchItem::imdbID
     ])]

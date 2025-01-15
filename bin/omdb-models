@@ -30,7 +30,7 @@ $to = rtrim($argv[1], '/');
 PackageHelper::publish(
     $from,
     $to,
-    PackageHelper::findNamespaceMapping($psr_4, $to),
+    PackageHelper::determineNamespace($psr_4, $to),
     static function(string $from, string $to){
         echo "Copied: $from to $to" . PHP_EOL;
     }

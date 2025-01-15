@@ -3,7 +3,6 @@
 namespace Zerotoprod\OmdbModels;
 
 use Zerotoprod\DataModel\Describe;
-use Zerotoprod\DataModelHelper\DataModelHelper;
 use Zerotoprod\OmdbModels\Helpers\DataModel;
 
 class SearchResults

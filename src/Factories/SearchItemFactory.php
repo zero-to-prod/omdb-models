@@ -2,7 +2,6 @@
 
 namespace Zerotoprod\OmdbModels\Factories;
 
-use Random\RandomException;
 use Zerotoprod\DataModelFactory\Factory;
 use Zerotoprod\OmdbModels\SearchItem;
 use Zerotoprod\OmdbModels\Type;

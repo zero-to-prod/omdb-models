@@ -1,184 +1,37 @@
 #!/usr/bin/env php
 <?php
 
-/**
- * Usage:
- *   ./vendor/bin/omdb-models <targetDir>
- *
- * Example:
- *   If your composer.json has:
- *     "autoload": {
- *       "psr-4": {
- *         "Zerotoprod\\DataModelFramework\\": "src/"
- *       }
- *     }
- *   and you run:
- *     ./vendor/bin/omdb-models src/DataModels
- *
- *   Then "src/" is matched as a prefix of "src/DataModels".
- *   The leftover subdirectory is "DataModels".
- *   The resulting namespace is "Zerotoprod\\DataModelFramework\\DataModels".
- *   The script copies files into ./src/DataModels, rewriting namespaces and use statements.
- */
+require getcwd() . '/vendor/autoload.php';
+
+use Zerotoprod\PackageHelper\PackageHelper;
 
 if ($argc !== 2) {
-    echo "Usage: omdb-models <targetDir>\n";
-    exit(1);
+    die("Usage: <targetDir>\n");
 }
 
-$targetDir = rtrim($argv[1], '/');
-
-/**
- * 1) Locate the 'src' folder of THIS package
- *    Adjust if necessary for your package’s structure.
- */
-$srcDir = dirname(__DIR__).'/src';
-if (!$srcDir) {
-    echo "Could not locate this package's src directory.\n";
-    exit(1);
+$from = __DIR__ . '/../src';
+if (!is_dir($from)) {
+    throw new RuntimeException("Source directory '$from' not found.");
 }
 
-/**
- * 2) Load the project's composer.json from the CURRENT WORKING DIRECTORY.
- *    We assume you run the script from your project's root (where composer.json lives).
- */
-$projectRoot = getcwd();
-$composerFile = $projectRoot . '/composer.json';
-
-if (!is_file($composerFile)) {
-    echo "No composer.json found in the current directory.\n";
-    exit(1);
+$composer_json_file_path = getcwd() . '/composer.json';
+if (!is_file($composer_json_file_path)) {
+    throw new RuntimeException("composer.json not found.");
 }
 
-$composerData = json_decode(file_get_contents($composerFile), true);
-if (!isset($composerData['autoload']['psr-4'])) {
-    echo "No psr-4 autoload section found in composer.json.\n";
-    exit(1);
+$composer_json_data = json_decode(file_get_contents($composer_json_file_path), true);
+$psr_4 = $composer_json_data['autoload']['psr-4'] ?? null;
+
+if (!$psr_4) {
+    throw new RuntimeException('PSR-4 autoload section missing in composer.json.');
 }
 
-/**
- * 3) Find a PSR-4 entry whose path is a prefix of $targetDir
- *    e.g. "Zerotoprod\\DataModelFramework\\" => "src/"
- *         if targetDir = "src/DataModels", then "src/" matches the prefix "src/" of "src/DataModels".
- */
-$psr4Map = $composerData['autoload']['psr-4'];
-
-$matchedPsr4Namespace = null;  // e.g. "Zerotoprod\\DataModelFramework\\"
-$matchedPsr4Dir = null;        // e.g. "src/"
-
-$inputPath = rtrim($targetDir, '/'); // e.g. "src/DataModels"
-
-foreach ($psr4Map as $namespaceKey => $psr4Path) {
-    // Remove trailing slash from the PSR-4 path definition
-    $cleanPsr4Dir = rtrim($psr4Path, '/'); // e.g. "src"
-
-    // If $inputPath (e.g. "src/DataModels") starts with "src" or "src/"
-    // we consider that a match.
-    // We'll compare "src/DataModels" with "src" at the beginning.
-    if (strpos($inputPath, $cleanPsr4Dir) === 0) {
-        // Found a matching prefix
-        $matchedPsr4Namespace = rtrim($namespaceKey, '\\'); // e.g. "Zerotoprod\\DataModelFramework"
-        $matchedPsr4Dir = $cleanPsr4Dir;                    // e.g. "src"
-        break;
+$to = rtrim($argv[1], '/');
+PackageHelper::publish(
+    $from,
+    $to,
+    PackageHelper::findNamespaceMapping($psr_4, $to),
+    static function(string $from, string $to){
+        echo "Copied: $from to $to" . PHP_EOL;
     }
-}
-
-if (!$matchedPsr4Namespace || !$matchedPsr4Dir) {
-    echo "Could not find a PSR-4 mapping in composer.json whose path is a prefix of '{$targetDir}'.\n";
-    echo "Please adjust your 'autoload.psr-4' or specify a different target.\n";
-    exit(1);
-}
-
-/**
- * 4) Derive the final namespace by appending leftover subfolders.
- *    If $targetDir is "src/DataModels" and the matched path is "src",
- *    leftover = "DataModels". Replace '/' with '\\' => "DataModels"
- *    Final namespace: "Zerotoprod\\DataModelFramework\\DataModels"
- */
-$leftover = ltrim(substr($inputPath, strlen($matchedPsr4Dir)), '/'); // e.g. "DataModels"
-$leftover = str_replace('/', '\\', $leftover);                       // e.g. "DataModels" (if multiple levels, becomes "X\\Y\\Z")
-
-$finalNamespace = $matchedPsr4Namespace;
-if ($leftover !== '') {
-    $finalNamespace .= '\\' . $leftover;  // e.g. "Zerotoprod\\DataModelFramework\\DataModels"
-}
-
-echo "Matched PSR-4 mapping: '{$matchedPsr4Namespace}' => '{$matchedPsr4Dir}'\n";
-echo "Appending leftover sub-namespace: '{$leftover}'\n";
-echo "Final namespace: '{$finalNamespace}'\n";
-echo "Copying into directory: '{$targetDir}'\n";
-
-/**
- * 5) Recursively copy files from THIS package's src/ to $targetDir,
- *    rewriting:
- *    - namespace lines
- *    - use Zerotoprod\OmdbModels\Foo => use {finalNamespace}\Foo
- */
-function copy_files(string $src, string $dst, string $baseNS, string $relativeNS = ''): void
-{
-    $fullNamespace = trim($baseNS . '\\' . $relativeNS, '\\');
-
-    if (!is_dir($dst)) {
-        if (!mkdir($dst, 0777, true) && !is_dir($dst)) {
-            throw new RuntimeException("Directory '{$dst}' could not be created.");
-        }
-    }
-
-    $handle = opendir($src);
-    if (!$handle) {
-        throw new RuntimeException("Directory '{$src}' could not be opened.");
-    }
-
-    while (($file = readdir($handle)) !== false) {
-        if ($file === '.' || $file === '..') {
-            continue;
-        }
-
-        $srcFile = $src . '/' . $file;
-        $dstFile = $dst . '/' . $file;
-
-        if (is_dir($srcFile)) {
-            // Recurse deeper, appending the directory name to the sub-namespace
-            copy_files(
-                $srcFile,
-                $dstFile,
-                $baseNS,
-                trim($relativeNS . '\\' . $file, '\\')
-            );
-        } else {
-            copy($srcFile, $dstFile);
-
-            $content = file_get_contents($dstFile);
-            if ($content === false) {
-                throw new RuntimeException("Could not read '{$dstFile}'.");
-            }
-
-            // 1) Replace the file's namespace line
-            $content = preg_replace(
-                '/^namespace\s+.*;/m',
-                'namespace ' . $fullNamespace . ';',
-                $content
-            );
-
-            // 2) Rewrite "use Zerotoprod\OmdbModels\..." => "use {baseNS}\..."
-            //    We only rewrite references to the OmdbModels package, leaving others alone.
-            $content = preg_replace(
-                '/^use\s+Zerotoprod\\\\OmdbModels\\\\(.+);/m',
-                'use ' . $baseNS . '\\\\$1;',
-                $content
-            );
-
-            file_put_contents($dstFile, $content);
-            echo "Copied: $dstFile (namespace: $fullNamespace)\n";
-        }
-    }
-
-    closedir($handle);
-}
-
-/**
- * Finally, do the copy from the package's src/ to your target.
- */
-copy_files($srcDir, $targetDir, $finalNamespace);
-
-echo "DONE\n";
+);

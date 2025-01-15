@@ -39,7 +39,10 @@
     "zero-to-prod/data-model-helper": "^v81.11.3",
     "zero-to-prod/data-model-factory": "^71.3.2",
     "ext-curl": "*",
-    "zero-to-prod/omdb-api": "^1.0.1"
+    "zero-to-prod/omdb-api": "^1.0.1",
+    "zero-to-prod/composer-package": "^1.0",
+    "ext-json": "*",
+    "zero-to-prod/package-helper": "^1.0"
   },
   "autoload": {
     "psr-4": {

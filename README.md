@@ -82,7 +82,7 @@ This package uses [Data Model Factories](https://github.com/zero-to-prod/data-mo
 You can directly import these files into your project like this:
 
 ```shell
-./vendor/bin/omdb-models app/DataModels
+./vendor/bin/omdb-models app/DataModels/OmdbModels
 ```
 
 The first argument is the destination of where the files are copied to.

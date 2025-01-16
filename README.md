@@ -17,6 +17,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Factories](#factories)
+- [Publishing DataModels](#publishing-datamodels)
 - [Local Development](./LOCAL_DEVELOPMENT.md)
 - [Contributing](#contributing)
 
@@ -75,6 +76,16 @@ This package uses [Data Model Factories](https://github.com/zero-to-prod/data-mo
 \Zerotoprod\OmdbModels\Factories\SearchResultsFactory::factory()->setTotalResults(2)->make();
 \Zerotoprod\OmdbModels\Factories\TitleFactory::factory()->setTitle('Avatar')->make();
 ```
+
+## Publishing DataModels
+
+You can directly import these files into your project like this:
+
+```shell
+./vendor/bin/file app/DataModels
+```
+
+The first argument is the destination of where the files are copied to.
 
 ## Contributing
 

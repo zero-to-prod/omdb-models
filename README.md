@@ -46,7 +46,7 @@ This will add the package to your project’s dependencies and create an autoloa
 You can directly import these files into your project like this:
 
 ```shell
-./vendor/bin/omdb-models ./app/DataModels
+./vendor/bin/omdb-models ./app/OmdbModels
 ```
 
 ## Usage

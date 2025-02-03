@@ -1,9 +1,10 @@
-FROM php:8.4-alpine AS builder
+FROM php:8.4-cli AS builder
 
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     unzip \
-    $PHPIZE_DEPS
+    $PHPIZE_DEPS \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN git config --global --add safe.directory /app
 
@@ -13,17 +14,18 @@ FROM builder AS composer
 
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin \
-    --filename=composer
+    --filename=composer \
+  && chmod +x /usr/local/bin/composer
 
 FROM builder AS debug
 
-RUN apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS \
-    && pecl channel-update pecl.php.net \
-    && pecl install xdebug-2.9.8 \
-    && docker-php-ext-enable xdebug \
-    && apk del .phpize-deps
+RUN pecl channel-update pecl.php.net \
+  && pecl install xdebug \
+  && docker-php-ext-enable xdebug \
+  && apt-get purge -y --auto-remove $PHPIZE_DEPS \
+  && rm -rf /tmp/* /var/lib/apt/lists/*
 
-FROM php:8.4-alpine AS base
+FROM php:8.4-cli AS base
 
 WORKDIR /app
 

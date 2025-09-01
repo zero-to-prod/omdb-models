@@ -80,11 +80,11 @@ jobs:
           
               if [[ ! -f "$php_file" ]]; then
                   echo "Warning: Main class file '$php_file' not found. Trying to find an alternative..." >&2
-                  
+          
                   # Try to find the first PHP class file in the directory
                   local alternative_file
                   alternative_file=$(find "$directory" -maxdepth 1 -name "*.php" -type f | head -1)
-                  
+          
                   if [[ -n "$alternative_file" ]]; then
                       echo "Using alternative file: $alternative_file" >&2
                       echo "$alternative_file"
